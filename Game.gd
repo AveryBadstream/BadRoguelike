@@ -53,6 +53,7 @@ class Item extends Reference:
 	var type
 	var strength
 	var use_function
+	var discovered = false
 	
 	func _init(game, x, y, item_type, level):
 		tile = Vector2(x, y)
@@ -150,6 +151,7 @@ var enemy_pathfinding
 
 onready var tile_map = $TileMap
 onready var visibility_map = $VisibilityMap
+onready var fow_map = $FogOfWar
 onready var player = $Player
 
 var player_tile
@@ -237,7 +239,7 @@ func do_move(x, y):
 	var blocked = false
 	for enemy in enemies:
 		if enemy.tile.x == x && enemy.tile.y == y:
-			enemy.take_damage(self, max(1, int(score/50)) * (1 if strong_turns == 0 else 2))
+			enemy.take_damage(self, max(1, int(score/250)) * (1 if strong_turns == 0 else 2))
 			if enemy.dead:
 				var drop_item = random_item_type(ITEM_DROP_CHANCES)
 				if drop_item:
@@ -313,6 +315,7 @@ func build_level():
 		for x in range(-50, LEVEL_SIZES[-1].x + 50):
 			for y in range(-50, LEVEL_SIZES[-1].y + 50):
 				visibility_map.set_cell(x,y,0)
+				fow_map.set_cell(x,y,0)
 	
 	for x in range(level_size.x):
 		map.append([])
@@ -404,13 +407,16 @@ func update_visuals():
 	var space_state = get_world_2d().direct_space_state
 	for x in range(level_size.x):
 		for y in range(level_size.y):
-			if visibility_map.get_cell(x,y) == 0:
-				var direction = tile_direction(player_tile, Vector2(x, y))
-				var test_point = tile_to_pixel_center(x, y) + direction * TILE_SIZE / 2
+			var direction = tile_direction(player_tile, Vector2(x, y))
+			var test_point = tile_to_pixel_center(x, y) + direction * TILE_SIZE / 2
+		
+			var occlusion = space_state.intersect_ray(player_center, test_point)
+			if !occlusion || (occlusion.position - test_point).length() < 1:
+				visibility_map.set_cell(x, y, -1)
+				fow_map.set_cell(x,y,-1)
+			else:
+				fow_map.set_cell(x,y,0)
 			
-				var occlusion = space_state.intersect_ray(player_center, test_point)
-				if !occlusion || (occlusion.position - test_point).length() < 1:
-					visibility_map.set_cell(x, y, -1)
 					
 	for enemy in enemies:
 		enemy.sprite_node.position = enemy.tile * TILE_SIZE
@@ -428,6 +434,9 @@ func update_visuals():
 		var occlusion = space_state.intersect_ray(player_center, item_center)
 		if !occlusion:
 			item.sprite_node.visible = true
+			item.discovered = true
+		elif !item.discovered:
+			item.sprite_node.visible = false
 					
 	$CanvasLayer/HP.text = "HP: " + str(player_hp)
 	$CanvasLayer/Score.text = "Score: " + str(score)
