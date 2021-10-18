@@ -387,11 +387,11 @@ func clear_path(tile):
 	
 	if tile.x > 0 && ( map[tile.x - 1][tile.y] == Tile.Floor || map[tile.x - 1][tile.y] == Tile.OpenDoor ):
 		points_to_connect.append(enemy_pathfinding.get_closest_point(Vector2(tile.x - 1, tile.y)))
-	elif tile.y > 0 && ( map[tile.x][tile.y - 1] == Tile.Floor || map[tile.x][tile.y - 1] == Tile.OpenDoor ):
+	if tile.y > 0 && ( map[tile.x][tile.y - 1] == Tile.Floor || map[tile.x][tile.y - 1] == Tile.OpenDoor ):
 		points_to_connect.append(enemy_pathfinding.get_closest_point(Vector2(tile.x, tile.y - 1)))
-	elif tile.x < level_size.x - 1 && ( map[tile.x + 1][tile.y] == Tile.Floor || map[tile.x + 1][tile.y] == Tile.OpenDoor ):
+	if tile.x < level_size.x - 1 && ( map[tile.x + 1][tile.y] == Tile.Floor || map[tile.x + 1][tile.y] == Tile.OpenDoor ):
 		points_to_connect.append(enemy_pathfinding.get_closest_point(Vector2(tile.x + 1, tile.y)))
-	elif tile.y < level_size.y - 1 && ( map[tile.x][tile.y + 1] == Tile.Floor || map[tile.x][tile.y + 1] == Tile.OpenDoor ):
+	if tile.y < level_size.y - 1 && ( map[tile.x][tile.y + 1] == Tile.Floor || map[tile.x][tile.y + 1] == Tile.OpenDoor ):
 		points_to_connect.append(enemy_pathfinding.get_closest_point(Vector2(tile.x, tile.y + 1)))
 		
 	for point in points_to_connect:
@@ -426,9 +426,7 @@ func update_visuals():
 		item.sprite_node.position = item.tile * TILE_SIZE
 		var item_center = tile_to_pixel_center(item.tile.x, item.tile.y)
 		var occlusion = space_state.intersect_ray(player_center, item_center)
-		if occlusion:
-			item.sprite_node.visible = false
-		else:
+		if !occlusion:
 			item.sprite_node.visible = true
 					
 	$CanvasLayer/HP.text = "HP: " + str(player_hp)
