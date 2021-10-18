@@ -88,7 +88,7 @@ class Enemy extends Reference:
 	var awake = false
 	
 	func _init(game, enemy_level, x, y):
-		full_hp = 1 + enemy_level * 2 
+		full_hp = (1 + enemy_level) * 2 
 		level = enemy_level + 1
 		hp = full_hp
 		tile = Vector2(x, y)
@@ -122,7 +122,7 @@ class Enemy extends Reference:
 			var move_tile = path[1]
 			
 			if move_tile == game.player_tile:
-				game.damage_player(max(1, int(level/3)))
+				game.damage_player(int((1+level) * (max(.5, (randi() % 100)/100 ) ) ) )
 			else:
 				var blocked = false
 				for enemy in game.enemies:
@@ -194,15 +194,20 @@ func try_move(dx, dy):
 		blind_turns -= 1
 	
 	if poison_turns > 0:
-		damage_player(1)
+		if player_hp > 1:
+			damage_player(1)
 		poison_turns -= 1
 		
 	if healing_turns > 0:
-		player_hp += 1
+		heal_player(2)
 		healing_turns -= 1
 	
 	if blind_turns > 0:
 		blind_turns -= 1
+		
+	if strong_turns >0:
+		strong_turns -= 1
+
 	match tile_type:
 		Tile.Floor:
 			acted = do_move(x, y)
@@ -212,6 +217,7 @@ func try_move(dx, dy):
 		
 		Tile.Door:
 			acted = set_tile(x, y, Tile.OpenDoor)
+			clear_path(Vector2(x,y))
 			
 		Tile.Stair:
 			level_num += 1
@@ -231,7 +237,7 @@ func do_move(x, y):
 	var blocked = false
 	for enemy in enemies:
 		if enemy.tile.x == x && enemy.tile.y == y:
-			enemy.take_damage(self, 1 if strong_turns == 0 else 3)
+			enemy.take_damage(self, max(1, int(score/50)) * (1 if strong_turns == 0 else 2))
 			if enemy.dead:
 				var drop_item = random_item_type(ITEM_DROP_CHANCES)
 				if drop_item:
@@ -267,24 +273,24 @@ func random_item_type(chance_list):
 	return null
 	
 func blind(item):
-	blind_turns = item.strength * (1+(randi() % 5))
+	blind_turns = item.strength * (1+(randi() % 5)) * 5
 	$CanvasLayer/Blind.visible = true
 	$Player/BlindEffect.visible = true
 
 func heal_over_time(item):
-	healing_turns = item.strength * (1+(randi() % 3))
+	healing_turns = item.strength * (1+(randi() % 3)) * 5
 	$CanvasLayer/Healing.visible = true
 	
 func poison(item):
-	poison_turns = item.strength * (1+(randi() % 4))
+	poison_turns = item.strength * (1+(randi() % 4)) * 5
 	$CanvasLayer/Poisoned.visible = true
 	
 func strength(item):
-	strong_turns = item.strength * (1+(randi() % 2))
+	strong_turns = item.strength * (1+(randi() % 2)) * 5
 	$CanvasLayer/Strong.visible = true
 
 func heal(item):
-	player_hp += item.strength * 5 
+	heal_player(item.strength * 5)
 	
 func score(item):
 	score += item.strength * 25
@@ -299,11 +305,15 @@ func build_level():
 	
 	enemy_pathfinding = AStar2D.new()
 	
+	level_size = LEVEL_SIZES[level_num]
+	
 	if !potion_types:
 		potion_types = POTION_FUNCTIONS.duplicate()
 		potion_types.shuffle()
+		for x in range(-50, LEVEL_SIZES[-1].x + 50):
+			for y in range(-50, LEVEL_SIZES[-1].y + 50):
+				visibility_map.set_cell(x,y,0)
 	
-	level_size = LEVEL_SIZES[level_num]
 	for x in range(level_size.x):
 		map.append([])
 		for y in range(level_size.y):
@@ -353,6 +363,8 @@ func build_level():
 			if item.tile.x == x && item.tile.y == y:
 				blocked = true
 				break
+		if map[x][y] == Tile.Stair:
+			blocked = true
 		if !blocked && x != player_tile.x && y != player_tile.y:
 			var item_type = random_item_type(ITEM_CREATION_CHANCES)
 			items.append(Item.new(self, x, y, item_type, level_num))
@@ -436,6 +448,8 @@ func update_visuals():
 		$CanvasLayer/Healing.visible = false
 	if strong_turns > 0:
 		$CanvasLayer/Strong.text = "STRONGK: " + str(strong_turns)
+	else:
+		$CanvasLayer/Strong.visible = false
 	
 func tile_direction(from_tile, to_tile):
 	return Vector2(1 if to_tile.x < from_tile.x else -1, 1 if to_tile.y < from_tile.y else -1)
@@ -635,6 +649,9 @@ func damage_player(dmg):
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
+		
+func heal_player(heal):
+	player_hp = min(10*( max(1,(score/50))), player_hp + heal )
 
 func _on_Button_pressed():
 	level_num = 0
