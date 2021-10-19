@@ -10,12 +10,12 @@ onready var FCT = get_node("FCT")
 
 func show_value(value, start_pos, travel, duration, spread, color=Color(255,255,255)):
 	FCT.text = str(value)
-	FCT.modulate = color
+	FCT.modulate(color)
 	var movement = travel.rotated(rand_range(-spread/2, spread/2))
 	position =  Vector2(start_pos.x+8, start_pos.y+4)
 	
 	tween.interpolate_property(self, "scale", scale,  Vector2(1,1), 0.2, Tween.TRANS_LINEAR, Tween.EASE_OUT)
-	tween.interpolate_property(self, "scale", Vector2(1,1), Vector2(0.1, 0.1), 0.7, Tween.TRANS_LINEAR, Tween.EASE_OUT, 0.3)
+	tween.interpolate_property(self, "scale", Vector2(1,1), Vector2(0.1, 0.1), 0.7, Tween.TRANS_LINEAR, Tween.EASE_OUT, 1)
 	tween.start()
 	
 #func _process(delta):
