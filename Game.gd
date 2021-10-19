@@ -111,8 +111,11 @@ class Enemy extends Reference:
 		sprite_node.get_node("HPBar").rect_size.x = TILE_SIZE * hp / full_hp
 		
 		if hp == 0:
+			game.FCTM.show_value("DEADED!!", tile, Color(255,0,0))
 			dead = true
 			game.score += 10 * level
+		else:
+			game.FCTM.show_value(dmg*-1, tile, Color(255,0,0))
 			
 	func act(game):
 		var my_point = game.enemy_pathfinding.get_closest_point(tile)
@@ -153,6 +156,7 @@ onready var tile_map = $TileMap
 onready var visibility_map = $VisibilityMap
 onready var fow_map = $FogOfWar
 onready var player = $Player
+onready var FCTM = $FCTManager
 
 var player_tile
 
@@ -275,19 +279,23 @@ func random_item_type(chance_list):
 	return null
 	
 func blind(item):
+	FCTM.show_value("Anti-Carrot Poition!", player_tile, Color(79, 63, 10))
 	blind_turns = item.strength * (1+(randi() % 5)) * 5
 	$CanvasLayer/Blind.visible = true
 	$Player/BlindEffect.visible = true
 
 func heal_over_time(item):
+	FCTM.show_value("Ivermectin!", player_tile, Color(255, 102, 209))
 	healing_turns = item.strength * (1+(randi() % 3)) * 5
 	$CanvasLayer/Healing.visible = true
 	
 func poison(item):
+	FCTM.show_value("Gross!", player_tile, Color(38, 97, 9))
 	poison_turns = item.strength * (1+(randi() % 4)) * 5
 	$CanvasLayer/Poisoned.visible = true
 	
 func strength(item):
+	FCTM.show_value("Super Male Vitality!", player_tile, Color(230, 195, 80))
 	strong_turns = item.strength * (1+(randi() % 2)) * 5
 	$CanvasLayer/Strong.visible = true
 
@@ -653,12 +661,15 @@ func set_tile(x, y, type):
 #	pass
 
 func damage_player(dmg):
+	FCTM.show_value(dmg*-1, player_tile, Color(255,0,0))
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
 		
 func heal_player(heal):
-	player_hp = min(10*( max(1,(score/50))), player_hp + heal )
+	if player_hp < 10*max(1,(score/50)):
+		var heal_amount = min((10*( max(1,(score/50))))-player_hp, heal )
+		FCTM.show_value(heal_amount, player_tile, Color(255, 102, 209))
 
 func _on_Button_pressed():
 	level_num = 0
