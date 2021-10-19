@@ -103,12 +103,12 @@ class Enemy extends Reference:
 		hp = full_hp
 		tile = Vector2(x, y)
 		sprite_node = EnemyScene.instance()
-		sprite_node.frame = enemy_level
-		sprite_node.modulate = game.ENEMY_COLORS[enemy_level]
+		game.add_child(sprite_node)
+		sprite_node.set_sprite(enemy_level)
+		sprite_node.modulate_sprite(game.ENEMY_COLORS[enemy_level])
 		sprite_node.position = tile * TILE_SIZE
 		sprite_node.visible = true
 		sprite_node.z_index = 1
-		game.add_child(sprite_node)
 	
 	func remove():
 		sprite_node.queue_free()
@@ -160,6 +160,8 @@ var blind_turns = 0
 var healing_turns = 0
 var poison_turns = 0
 var strong_turns = 0
+var player_level = 1
+var player_max_hp = 10
 
 var enemy_pathfinding
 
@@ -254,7 +256,7 @@ func do_move(x, y):
 	var blocked = false
 	for enemy in enemies:
 		if enemy.tile.x == x && enemy.tile.y == y:
-			enemy.take_damage(self, max(1, int(score/250)) * (1 if strong_turns == 0 else 2))
+			enemy.take_damage(self, max(1, int(player_level/2)) * (1 if strong_turns == 0 else 2))
 			if enemy.dead:
 				var drop_item = random_item_type(ITEM_DROP_CHANCES) if enemy.level < 5 else random_item_type(ITEM_CREATION_CHANCES)
 				if drop_item:
@@ -275,6 +277,8 @@ func pickup_items():
 	var remove_queue = []
 	for item in items:
 		if item.tile == player_tile:
+			if item.use_function == "heal" and player_hp == player_max_hp:
+				continue
 			call(item.use_function, item)
 			item.remove()
 			remove_queue.append(item)
@@ -403,7 +407,7 @@ func build_level():
 	var stair_y = end_room.position.y + 1 + randi() % int(end_room.size.y - 2)
 	set_tile(stair_x, stair_y, Tile.Stair)
 	
-	$CanvasLayer/Level.text = "Level: " + str(level_num + 1)
+	$CanvasLayer/Level.text = "Floor: " + str(level_num + 1)
 	#tile_map.update_bitmask_region(Vector2(1,1), Vector2(level_size.x - 1, level_size.y - 1))
 
 func clear_path(tile):
@@ -460,9 +464,16 @@ func update_visuals():
 			item.discovered = true
 		elif !item.discovered:
 			item.sprite_node.visible = false
+	
+	var cur_level = calc_player_level()
+	if cur_level > player_level:
+		FCTM.show_value("LEVEL UP!", player_tile, Color.blue)
+		player_level = cur_level
+	player_max_hp = calc_player_max_hp()
 					
-	$CanvasLayer/HP.text = "HP: " + str(player_hp)
+	$CanvasLayer/HP.text = "HP: " + str(player_hp) + "/" + str(player_max_hp)
 	$CanvasLayer/Score.text = "Score: " + str(score)
+	$CanvasLayer/Player_Level.text = "Level: " + str(player_level)
 	if blind_turns > 0:
 		$CanvasLayer/Blind.text = "Blind: " + str(blind_turns)
 	else:
@@ -480,6 +491,7 @@ func update_visuals():
 		$CanvasLayer/Strong.text = "STRONGK: " + str(strong_turns)
 	else:
 		$CanvasLayer/Strong.visible = false
+		
 	
 func tile_direction(from_tile, to_tile):
 	return Vector2(1 if to_tile.x < from_tile.x else -1, 1 if to_tile.y < from_tile.y else -1)
@@ -680,12 +692,17 @@ func damage_player(dmg):
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
-		
+
+func calc_player_level():
+	return floor(score/50) + 1
+
+func calc_player_max_hp():
+	return (player_level * 5) + 5
+
 func heal_player(heal):
-	var max_hp = 10*((score/50) + 1)
-	if player_hp < max_hp:
-		var hpdiff = max_hp - player_hp
-		var heal_amount = max(hpdiff, heal)
+	if player_hp < player_max_hp:
+		var hpdiff = player_max_hp - player_hp
+		var heal_amount = min(hpdiff, heal)
 		FCTM.show_value(heal_amount, player_tile, Color.pink)
 		player_hp += heal_amount
 

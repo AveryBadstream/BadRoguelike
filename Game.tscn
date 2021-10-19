@@ -244,23 +244,23 @@ __meta__ = {
 [node name="Level" type="Label" parent="CanvasLayer"]
 margin_right = 40.0
 margin_bottom = 14.0
-text = "Level:"
+text = "Floor: 1"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HP" type="Label" parent="CanvasLayer"]
-margin_left = 112.0
-margin_right = 152.0
+margin_left = 128.0
+margin_right = 187.0
 margin_bottom = 14.0
-text = "HP:"
+text = "HP:10/10"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Score" type="Label" parent="CanvasLayer"]
-margin_left = 176.0
-margin_right = 216.0
+margin_left = 208.0
+margin_right = 248.0
 margin_bottom = 14.0
 text = "Score:"
 __meta__ = {
@@ -357,6 +357,15 @@ margin_right = 315.0
 margin_bottom = 174.0
 custom_colors/font_color = Color( 0.937255, 1, 0.576471, 1 )
 text = "Strongk: 0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player_Level" type="Label" parent="CanvasLayer"]
+margin_left = 64.0
+margin_right = 114.0
+margin_bottom = 14.0
+text = "Level: 1"
 __meta__ = {
 "_edit_use_anchors_": false
 }
