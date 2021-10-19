@@ -82,6 +82,7 @@ class Item extends Reference:
 			sprite_node.modulate = TREASURE_COLORS[strength - 1]
 			use_function = "score"
 		sprite_node.position = tile * TILE_SIZE
+		sprite_node.visible = false
 		game.add_child(sprite_node)
 			
 		
@@ -162,6 +163,7 @@ var poison_turns = 0
 var strong_turns = 0
 var player_level = 1
 var player_max_hp = 10
+var game_stopped = true
 
 var enemy_pathfinding
 
@@ -182,6 +184,8 @@ func _ready():
 	
 func _input(event):
 	if !event.is_pressed() && !(event is InputEventMouseButton):
+		return
+	if game_stopped:
 		return
 	if event.is_action("Left"):
 		try_move(-1, 0)
@@ -246,6 +250,7 @@ func try_move(dx, dy):
 			else:
 				score += 1000
 				$CanvasLayer/Win.visible = true
+				game_stopped = true
 				
 	for enemy in enemies:
 		enemy.act(self)
@@ -384,20 +389,23 @@ func build_level():
 			
 	var num_items = LEVEL_ITEM_COUNTS[level_num]
 	for i in range(num_items):
-		var room = rooms[randi() % (rooms.size())]
-		var x = room.position.x + 1 + randi() % int(room.size.x - 2)
-		var y = room.position.y + 1 + randi() % int(room.size.y - 2)
-		
-		var blocked = false
-		for item in items:
-			if item.tile.x == x && item.tile.y == y:
+		var place_tries = 0
+		var blocked = true
+		while blocked and place_tries < 10:
+			blocked = false
+			var room = rooms[randi() % (rooms.size())]
+			var x = room.position.x + 1 + randi() % int(room.size.x - 2)
+			var y = room.position.y + 1 + randi() % int(room.size.y - 2)
+			for item in items:
+				if item.tile.x == x && item.tile.y == y:
+					blocked = true
+					break
+			if map[x][y] == Tile.Stair or map[x][y] == Tile.Wall or map[x][y] == Tile.Stone:
 				blocked = true
-				break
-		if map[x][y] == Tile.Stair:
-			blocked = true
-		if !blocked && x != player_tile.x && y != player_tile.y:
-			var item_type = random_item_type(ITEM_CREATION_CHANCES)
-			items.append(Item.new(self, x, y, item_type, level_num))
+			if !blocked && x != player_tile.x && y != player_tile.y:
+				var item_type = random_item_type(ITEM_CREATION_CHANCES)
+				items.append(Item.new(self, x, y, item_type, level_num))
+			place_tries += 1
 	
 	call_deferred("update_visuals")
 	
@@ -406,6 +414,8 @@ func build_level():
 	var stair_x = end_room.position.x + 1 + randi() % int(end_room.size.x - 2)
 	var stair_y = end_room.position.y + 1 + randi() % int(end_room.size.y - 2)
 	set_tile(stair_x, stair_y, Tile.Stair)
+	
+	game_stopped = false
 	
 	$CanvasLayer/Level.text = "Floor: " + str(level_num + 1)
 	#tile_map.update_bitmask_region(Vector2(1,1), Vector2(level_size.x - 1, level_size.y - 1))
@@ -692,6 +702,11 @@ func damage_player(dmg):
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
+		poison_turns = 0
+		strong_turns = 0
+		blind_turns = 0
+		strong_turns = 0
+		game_stopped = true
 
 func calc_player_level():
 	return floor(score/50) + 1
@@ -714,4 +729,5 @@ func _on_Button_pressed():
 	build_level()
 	$CanvasLayer/Win.visible = false
 	$CanvasLayer/Lose.visible = false
-	player_hp = PLAYER_START_HP
+	player_hp = calc_player_max_hp()
+	player_level = calc_player_level()
