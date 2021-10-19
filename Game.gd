@@ -13,6 +13,8 @@ const LEVEL_SIZES =[
 	Vector2(50, 50)
 ]
 
+const LEVEL_COLORS = [Color.beige, Color.cadetblue, Color.darkmagenta, Color.goldenrod, Color.lightsalmon, Color.darkgray, Color.lawngreen]
+const ENEMY_COLORS = [Color.green, Color.purple, Color.darkslateblue, Color.indigo, Color.orangered, Color.gold]
 const LEVEL_ROOM_COUNTS = [5, 7, 9, 12, 15]
 const LEVEL_ENEMY_COUNTS = [5, 8, 12, 18, 26]
 const LEVEL_ITEM_COUNTS = [2, 4, 6, 8, 10]
@@ -29,8 +31,11 @@ const FoodScene = preload("res://Food.tscn")
 const TreasureScene = preload("res://Treasure.tscn")
 
 const FOOD_LEVELS = [5, 6, 7, 0, 1]
+const FOOD_COLORS = [Color.darkgoldenrod, Color.antiquewhite, Color.yellow, Color.orange, Color.red]
 const TREASURE_LEVELS = [2, 1, 3, 0, 0]
+const TREASURE_COLORS = [Color.gold, Color.gold, Color.lightblue, Color.darkkhaki]
 const POTION_FUNCTIONS = ["blind", "heal_over_time", "poison", "heal", "strength"]
+const POTION_COLORS = [Color.magenta, Color.green, Color.yellow, Color.aqua, Color.blueviolet]
 
 enum ItemEffect {Heal, HealOverTime, Poison, Blind, Strength, Score}
 enum ItemType {Potion, Food, Treasure}
@@ -62,15 +67,19 @@ class Item extends Reference:
 		if type == ItemType.Food:
 			sprite_node = FoodScene.instance()
 			sprite_node.frame = FOOD_LEVELS[strength - 1]
+			sprite_node.modulate = FOOD_COLORS[strength -1]
 			use_function = "heal"
 		elif type == ItemType.Potion:
 			sprite_node = PotionScene.instance()
+			sprite_node.modulate = Color.darkolivegreen
 			var rand_type = randi() % game.potion_types.size()
 			use_function = game.potion_types[rand_type]
-			sprite_node.frame = rand_type
+			sprite_node.frame = strength - 1
+			sprite_node.modulate = game.potion_colors[rand_type]
 		elif type == ItemType.Treasure:
 			sprite_node = TreasureScene.instance()
 			sprite_node.frame = TREASURE_LEVELS[strength - 1]
+			sprite_node.modulate = TREASURE_COLORS[strength - 1]
 			use_function = "score"
 		sprite_node.position = tile * TILE_SIZE
 		game.add_child(sprite_node)
@@ -95,6 +104,7 @@ class Enemy extends Reference:
 		tile = Vector2(x, y)
 		sprite_node = EnemyScene.instance()
 		sprite_node.frame = enemy_level
+		sprite_node.modulate = game.ENEMY_COLORS[enemy_level]
 		sprite_node.position = tile * TILE_SIZE
 		sprite_node.visible = true
 		sprite_node.z_index = 1
@@ -111,11 +121,11 @@ class Enemy extends Reference:
 		sprite_node.get_node("HPBar").rect_size.x = TILE_SIZE * hp / full_hp
 		
 		if hp == 0:
-			game.FCTM.show_value("DEADED!!", tile, Color("red"))
+			game.FCTM.show_value("DEADED!!", tile, Color.red)
 			dead = true
 			game.score += 10 * level
 		else:
-			game.FCTM.show_value(dmg*-1, tile, Color("red"))
+			game.FCTM.show_value(dmg*-1, tile, Color.red)
 			
 	func act(game):
 		var my_point = game.enemy_pathfinding.get_closest_point(tile)
@@ -145,6 +155,7 @@ var enemies = []
 var player_hp = PLAYER_START_HP
 var items = []
 var potion_types
+var potion_colors
 var blind_turns = 0
 var healing_turns = 0
 var poison_turns = 0
@@ -245,7 +256,7 @@ func do_move(x, y):
 		if enemy.tile.x == x && enemy.tile.y == y:
 			enemy.take_damage(self, max(1, int(score/250)) * (1 if strong_turns == 0 else 2))
 			if enemy.dead:
-				var drop_item = random_item_type(ITEM_DROP_CHANCES)
+				var drop_item = random_item_type(ITEM_DROP_CHANCES) if enemy.level < 5 else random_item_type(ITEM_CREATION_CHANCES)
 				if drop_item:
 					for item in items:
 						if item.tile == enemy.tile:
@@ -279,23 +290,23 @@ func random_item_type(chance_list):
 	return null
 	
 func blind(item):
-	FCTM.show_value("Anti-Carrot Poition!", player_tile, Color("orange"))
+	FCTM.show_value("Anti-Carrot Poition!", player_tile, Color.orange)
 	blind_turns = item.strength * (1+(randi() % 5)) * 5
 	$CanvasLayer/Blind.visible = true
 	$Player/BlindEffect.visible = true
 
 func heal_over_time(item):
-	FCTM.show_value("Ivermectin!", player_tile, Color("pink"))
+	FCTM.show_value("Ivermectin!", player_tile, Color.pink)
 	healing_turns = item.strength * (1+(randi() % 3)) * 5
 	$CanvasLayer/Healing.visible = true
 	
 func poison(item):
-	FCTM.show_value("Gross!", player_tile, Color("darkgreen"))
+	FCTM.show_value("Gross!", player_tile, Color.darkgreen)
 	poison_turns = item.strength * (1+(randi() % 4)) * 5
 	$CanvasLayer/Poisoned.visible = true
 	
 func strength(item):
-	FCTM.show_value("Super Male Vitality!", player_tile, Color("gold"))
+	FCTM.show_value("Super Male Vitality!", player_tile, Color.gold)
 	strong_turns = item.strength * (1+(randi() % 2)) * 5
 	$CanvasLayer/Strong.visible = true
 
@@ -313,13 +324,17 @@ func build_level():
 		enemy.remove()
 	enemies.clear()
 	
+	tile_map.modulate = LEVEL_COLORS[int(randi() % LEVEL_COLORS.size())]
+		
 	enemy_pathfinding = AStar2D.new()
 	
 	level_size = LEVEL_SIZES[level_num]
 	
 	if !potion_types:
 		potion_types = POTION_FUNCTIONS.duplicate()
+		potion_colors = POTION_COLORS.duplicate()
 		potion_types.shuffle()
+		potion_colors.shuffle()
 		for x in range(-50, LEVEL_SIZES[-1].x + 50):
 			for y in range(-50, LEVEL_SIZES[-1].y + 50):
 				visibility_map.set_cell(x,y,0)
@@ -661,7 +676,7 @@ func set_tile(x, y, type):
 #	pass
 
 func damage_player(dmg):
-	FCTM.show_value(dmg*-1, player_tile, Color("red"))
+	FCTM.show_value(dmg*-1, player_tile, Color.red)
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
@@ -671,7 +686,7 @@ func heal_player(heal):
 	if player_hp < max_hp:
 		var hpdiff = max_hp - player_hp
 		var heal_amount = max(hpdiff, heal)
-		FCTM.show_value(heal_amount, player_tile, Color("pink"))
+		FCTM.show_value(heal_amount, player_tile, Color.pink)
 		player_hp += heal_amount
 
 func _on_Button_pressed():

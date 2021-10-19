@@ -199,6 +199,7 @@ format = 1
 tile_data = PoolIntArray( 196626, 4, 0, 196627, 4, 9, 196628, 4, 0, 196629, 4, 0, 262163, 4, 0, 393226, 4, 3, 393227, 4, 0, 393228, 4, 0, 393229, 4, 4, 393242, 4, 0, 458755, 4, 3, 458756, 4, 0, 458757, 4, 4, 458762, 4, 0, 458765, 4, 0, 458778, 4, 5, 458779, 4, 4, 458780, 4, 0, 458781, 4, 0, 458782, 4, 0, 458783, 4, 4, 524291, 4, 0, 524293, 4, 0, 524298, 4, 1, 524301, 4, 0, 524315, 4, 2, 524319, 4, 1, 589827, 4, 1, 589829, 4, 1, 589834, 4, 1, 589837, 4, 0, 589838, 4, 0, 589851, 4, 1, 589855, 4, 1, 655363, 4, 1, 655365, 4, 1, 655370, 4, 1, 655374, 4, 0, 655387, 4, 1, 655391, 4, 1, 720899, 4, 1, 720901, 4, 1, 720906, 4, 0, 720909, 4, 0, 720910, 4, 0, 720923, 4, 5, 720924, 4, 0, 720925, 4, 0, 720926, 4, 0, 720927, 4, 6, 786435, 4, 0, 786437, 4, 0, 786442, 4, 5, 786443, 4, 0, 786444, 4, 0, 786445, 4, 0, 851971, 4, 5, 851972, 4, 0, 851973, 4, 6 )
 
 [node name="Player" type="Sprite" parent="."]
+modulate = Color( 0.917647, 0.658824, 0.658824, 1 )
 position = Vector2( 160, 80 )
 z_index = 2
 texture = ExtResource( 1 )
@@ -318,6 +319,7 @@ text = "Restart"
 margin_top = 160.0
 margin_right = 65.0
 margin_bottom = 174.0
+custom_colors/font_color = Color( 0.960784, 0.835294, 0.333333, 1 )
 text = "Blind: 0"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -329,6 +331,7 @@ margin_left = 64.0
 margin_top = 160.0
 margin_right = 139.0
 margin_bottom = 174.0
+custom_colors/font_color = Color( 0.0980392, 0.521569, 0.121569, 1 )
 text = "Poisoned: 0"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -340,6 +343,7 @@ margin_left = 160.0
 margin_top = 160.0
 margin_right = 235.0
 margin_bottom = 174.0
+custom_colors/font_color = Color( 0.87451, 0.462745, 0.878431, 1 )
 text = "Healing: 0"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -351,6 +355,7 @@ margin_left = 240.0
 margin_top = 160.0
 margin_right = 315.0
 margin_bottom = 174.0
+custom_colors/font_color = Color( 0.937255, 1, 0.576471, 1 )
 text = "Strongk: 0"
 __meta__ = {
 "_edit_use_anchors_": false

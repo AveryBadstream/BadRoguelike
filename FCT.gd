@@ -10,7 +10,7 @@ onready var FCT = get_node("FCT")
 
 func show_value(value, start_pos, travel, duration, spread, color=Color(255,255,255)):
 	FCT.text = str(value)
-	FCT.modulate(color)
+	FCT.set("custom_colors/font_color",color)
 	var movement = travel.rotated(rand_range(-spread/2, spread/2))
 	position =  Vector2(start_pos.x+8, start_pos.y+4)
 	
