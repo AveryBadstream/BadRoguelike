@@ -22,7 +22,7 @@ _global_script_class_icons={
 
 config/name="Roguelike"
 run/main_scene="res://Game.tscn"
-config/icon="res://icon.png"
+config/icon="res://art/hot_dog.png"
 
 [display]
 
