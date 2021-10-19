@@ -1,0 +1,377 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://art/rgsheet.png" type="Texture" id=1]
+[ext_resource path="res://Game.gd" type="Script" id=2]
+[ext_resource path="res://art/blind_mask.png" type="Texture" id=3]
+[ext_resource path="res://FCTManager.gd" type="Script" id=4]
+
+[sub_resource type="ConvexPolygonShape2D" id=1]
+points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
+
+[sub_resource type="ConvexPolygonShape2D" id=2]
+points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
+
+[sub_resource type="ConvexPolygonShape2D" id=3]
+points = PoolVector2Array( 0, 0, 16, 0, 16, 16, 0, 16 )
+
+[sub_resource type="TileSet" id=4]
+1/name = "Floor"
+1/texture = ExtResource( 1 )
+1/tex_offset = Vector2( 0, 0 )
+1/modulate = Color( 1, 1, 1, 1 )
+1/region = Rect2( 80, 416, 16, 16 )
+1/tile_mode = 0
+1/occluder_offset = Vector2( 0, 0 )
+1/navigation_offset = Vector2( 0, 0 )
+1/shape_offset = Vector2( 0, 0 )
+1/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+1/shape_one_way = false
+1/shape_one_way_margin = 0.0
+1/shapes = [  ]
+1/z_index = 0
+2/name = "Stair"
+2/texture = ExtResource( 1 )
+2/tex_offset = Vector2( 0, 0 )
+2/modulate = Color( 1, 1, 1, 1 )
+2/region = Rect2( 192, 416, 16, 16 )
+2/tile_mode = 0
+2/occluder_offset = Vector2( 0, 0 )
+2/navigation_offset = Vector2( 0, 0 )
+2/shape_offset = Vector2( 0, 0 )
+2/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+2/shape_one_way = false
+2/shape_one_way_margin = 0.0
+2/shapes = [  ]
+2/z_index = 0
+3/name = "Door"
+3/texture = ExtResource( 1 )
+3/tex_offset = Vector2( 0, 0 )
+3/modulate = Color( 1, 1, 1, 1 )
+3/region = Rect2( 224, 416, 16, 16 )
+3/tile_mode = 0
+3/occluder_offset = Vector2( 0, 0 )
+3/navigation_offset = Vector2( 0, 0 )
+3/shape_offset = Vector2( 0, 0 )
+3/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+3/shape = SubResource( 1 )
+3/shape_one_way = false
+3/shape_one_way_margin = 1.0
+3/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 1 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
+} ]
+3/z_index = 0
+4/name = "AutoWall"
+4/texture = ExtResource( 1 )
+4/tex_offset = Vector2( 0, 0 )
+4/modulate = Color( 1, 1, 1, 1 )
+4/region = Rect2( 32, 448, 192, 16 )
+4/tile_mode = 1
+4/autotile/bitmask_mode = 2
+4/autotile/bitmask_flags = [ Vector2( 0, 0 ), 56, Vector2( 1, 0 ), 146, Vector2( 2, 0 ), 2, Vector2( 3, 0 ), 16777392, Vector2( 4, 0 ), 4194456, Vector2( 5, 0 ), 262194, Vector2( 6, 0 ), 65562, Vector2( 7, 0 ), 17039538, Vector2( 8, 0 ), 4259994, Vector2( 9, 0 ), 20971704, Vector2( 10, 0 ), 327738, Vector2( 11, 0 ), 21299386 ]
+4/autotile/icon_coordinate = Vector2( 0, 0 )
+4/autotile/tile_size = Vector2( 16, 16 )
+4/autotile/spacing = 0
+4/autotile/occluder_map = [  ]
+4/autotile/navpoly_map = [  ]
+4/autotile/priority_map = [  ]
+4/autotile/z_index_map = [  ]
+4/occluder_offset = Vector2( 0, 0 )
+4/navigation_offset = Vector2( 0, 0 )
+4/shape_offset = Vector2( 0, 0 )
+4/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+4/shape_one_way = false
+4/shape_one_way_margin = 0.0
+4/shapes = [  ]
+4/z_index = 0
+5/name = "Stone"
+5/texture = ExtResource( 1 )
+5/tex_offset = Vector2( 0, 0 )
+5/modulate = Color( 1, 1, 1, 1 )
+5/region = Rect2( 112, 416, 16, 16 )
+5/tile_mode = 0
+5/occluder_offset = Vector2( 0, 0 )
+5/navigation_offset = Vector2( 0, 0 )
+5/shape_offset = Vector2( 0, 0 )
+5/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+5/shape = SubResource( 2 )
+5/shape_one_way = false
+5/shape_one_way_margin = 1.0
+5/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 2 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
+} ]
+5/z_index = 0
+6/name = "Wall"
+6/texture = ExtResource( 1 )
+6/tex_offset = Vector2( 0, 0 )
+6/modulate = Color( 1, 1, 1, 1 )
+6/region = Rect2( 32, 416, 16, 16 )
+6/tile_mode = 0
+6/occluder_offset = Vector2( 0, 0 )
+6/navigation_offset = Vector2( 0, 0 )
+6/shape_offset = Vector2( 0, 0 )
+6/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+6/shape = SubResource( 3 )
+6/shape_one_way = false
+6/shape_one_way_margin = 1.0
+6/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 3 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
+} ]
+6/z_index = 0
+7/name = "OpenDoor"
+7/texture = ExtResource( 1 )
+7/tex_offset = Vector2( 0, 0 )
+7/modulate = Color( 1, 1, 1, 1 )
+7/region = Rect2( 240, 416, 16, 16 )
+7/tile_mode = 0
+7/occluder_offset = Vector2( 0, 0 )
+7/navigation_offset = Vector2( 0, 0 )
+7/shape_offset = Vector2( 0, 0 )
+7/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+7/shape_one_way = false
+7/shape_one_way_margin = 0.0
+7/shapes = [  ]
+7/z_index = 0
+
+[sub_resource type="TileSet" id=5]
+0/name = "Hidden"
+0/texture = ExtResource( 1 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 160, 368, 16, 16 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
+
+[sub_resource type="TileSet" id=6]
+0/name = "rgsheet.png 0"
+0/texture = ExtResource( 1 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 256, 80, 16, 16 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
+
+[node name="Game" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = SubResource( 4 )
+cell_size = Vector2( 16, 16 )
+format = 1
+
+[node name="VisibilityMap" type="TileMap" parent="."]
+tile_set = SubResource( 5 )
+cell_size = Vector2( 16, 16 )
+format = 1
+tile_data = PoolIntArray( 196626, 4, 0, 196627, 4, 9, 196628, 4, 0, 196629, 4, 0, 262163, 4, 0, 393226, 4, 3, 393227, 4, 0, 393228, 4, 0, 393229, 4, 4, 393242, 4, 0, 458755, 4, 3, 458756, 4, 0, 458757, 4, 4, 458762, 4, 0, 458765, 4, 0, 458778, 4, 5, 458779, 4, 4, 458780, 4, 0, 458781, 4, 0, 458782, 4, 0, 458783, 4, 4, 524291, 4, 0, 524293, 4, 0, 524298, 4, 1, 524301, 4, 0, 524315, 4, 2, 524319, 4, 1, 589827, 4, 1, 589829, 4, 1, 589834, 4, 1, 589837, 4, 0, 589838, 4, 0, 589851, 4, 1, 589855, 4, 1, 655363, 4, 1, 655365, 4, 1, 655370, 4, 1, 655374, 4, 0, 655387, 4, 1, 655391, 4, 1, 720899, 4, 1, 720901, 4, 1, 720906, 4, 0, 720909, 4, 0, 720910, 4, 0, 720923, 4, 5, 720924, 4, 0, 720925, 4, 0, 720926, 4, 0, 720927, 4, 6, 786435, 4, 0, 786437, 4, 0, 786442, 4, 5, 786443, 4, 0, 786444, 4, 0, 786445, 4, 0, 851971, 4, 5, 851972, 4, 0, 851973, 4, 6 )
+
+[node name="FogOfWar" type="TileMap" parent="."]
+modulate = Color( 0, 0, 0, 0.827451 )
+z_index = 3
+tile_set = SubResource( 6 )
+cell_size = Vector2( 16, 16 )
+format = 1
+tile_data = PoolIntArray( 196626, 4, 0, 196627, 4, 9, 196628, 4, 0, 196629, 4, 0, 262163, 4, 0, 393226, 4, 3, 393227, 4, 0, 393228, 4, 0, 393229, 4, 4, 393242, 4, 0, 458755, 4, 3, 458756, 4, 0, 458757, 4, 4, 458762, 4, 0, 458765, 4, 0, 458778, 4, 5, 458779, 4, 4, 458780, 4, 0, 458781, 4, 0, 458782, 4, 0, 458783, 4, 4, 524291, 4, 0, 524293, 4, 0, 524298, 4, 1, 524301, 4, 0, 524315, 4, 2, 524319, 4, 1, 589827, 4, 1, 589829, 4, 1, 589834, 4, 1, 589837, 4, 0, 589838, 4, 0, 589851, 4, 1, 589855, 4, 1, 655363, 4, 1, 655365, 4, 1, 655370, 4, 1, 655374, 4, 0, 655387, 4, 1, 655391, 4, 1, 720899, 4, 1, 720901, 4, 1, 720906, 4, 0, 720909, 4, 0, 720910, 4, 0, 720923, 4, 5, 720924, 4, 0, 720925, 4, 0, 720926, 4, 0, 720927, 4, 6, 786435, 4, 0, 786437, 4, 0, 786442, 4, 5, 786443, 4, 0, 786444, 4, 0, 786445, 4, 0, 851971, 4, 5, 851972, 4, 0, 851973, 4, 6 )
+
+[node name="Player" type="Sprite" parent="."]
+modulate = Color( 0.917647, 0.658824, 0.658824, 1 )
+position = Vector2( 160, 80 )
+z_index = 2
+texture = ExtResource( 1 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 32, 96, 16, 16 )
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+current = true
+offset_h = 1.0
+offset_v = 1.0
+drag_margin_left = 0.0
+drag_margin_top = 0.0
+drag_margin_right = 0.0
+drag_margin_bottom = 0.0
+
+[node name="BlindEffect" type="Light2D" parent="Player"]
+visible = false
+texture = ExtResource( 3 )
+offset = Vector2( 16, 16 )
+mode = 3
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+margin_right = 320.0
+margin_bottom = 16.0
+color = Color( 0.219608, 0.203922, 0.203922, 0.643137 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer"]
+margin_top = 160.0
+margin_right = 320.0
+margin_bottom = 192.0
+color = Color( 0.219608, 0.203922, 0.203922, 0.643137 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Level" type="Label" parent="CanvasLayer"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Floor: 1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HP" type="Label" parent="CanvasLayer"]
+margin_left = 128.0
+margin_right = 187.0
+margin_bottom = 14.0
+text = "HP:10/10"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Score" type="Label" parent="CanvasLayer"]
+margin_left = 208.0
+margin_right = 248.0
+margin_bottom = 14.0
+text = "Score:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Win" type="ColorRect" parent="CanvasLayer"]
+visible = false
+margin_top = 16.0
+margin_right = 320.0
+margin_bottom = 176.0
+color = Color( 0.258824, 0.407843, 0.917647, 0.317647 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/Win"]
+margin_right = 320.0
+margin_bottom = 160.0
+text = "YOU WIN!"
+align = 1
+valign = 1
+
+[node name="Button" type="Button" parent="CanvasLayer/Win"]
+margin_left = 128.0
+margin_top = 96.0
+margin_right = 208.0
+margin_bottom = 116.0
+text = "Restart"
+
+[node name="Lose" type="ColorRect" parent="CanvasLayer"]
+visible = false
+margin_top = 16.0
+margin_right = 320.0
+margin_bottom = 176.0
+color = Color( 0.917647, 0.258824, 0.258824, 0.317647 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/Lose"]
+margin_right = 320.0
+margin_bottom = 160.0
+text = "You lose, loser."
+align = 1
+valign = 1
+
+[node name="Button" type="Button" parent="CanvasLayer/Lose"]
+margin_left = 128.0
+margin_top = 96.0
+margin_right = 208.0
+margin_bottom = 116.0
+text = "Restart"
+
+[node name="Blind" type="Label" parent="CanvasLayer"]
+margin_top = 160.0
+margin_right = 65.0
+margin_bottom = 174.0
+custom_colors/font_color = Color( 0.960784, 0.835294, 0.333333, 1 )
+text = "Blind: 0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Poisoned" type="Label" parent="CanvasLayer"]
+visible = false
+margin_left = 64.0
+margin_top = 160.0
+margin_right = 139.0
+margin_bottom = 174.0
+custom_colors/font_color = Color( 0.0980392, 0.521569, 0.121569, 1 )
+text = "Poisoned: 0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Healing" type="Label" parent="CanvasLayer"]
+visible = false
+margin_left = 160.0
+margin_top = 160.0
+margin_right = 235.0
+margin_bottom = 174.0
+custom_colors/font_color = Color( 0.87451, 0.462745, 0.878431, 1 )
+text = "Healing: 0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Strong" type="Label" parent="CanvasLayer"]
+visible = false
+margin_left = 240.0
+margin_top = 160.0
+margin_right = 315.0
+margin_bottom = 174.0
+custom_colors/font_color = Color( 0.937255, 1, 0.576471, 1 )
+text = "Strongk: 0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player_Level" type="Label" parent="CanvasLayer"]
+margin_left = 64.0
+margin_right = 114.0
+margin_bottom = 14.0
+text = "Level: 1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FCTManager" type="Node2D" parent="."]
+script = ExtResource( 4 )
+
+[connection signal="pressed" from="CanvasLayer/Win/Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="CanvasLayer/Lose/Button" to="." method="_on_Button_pressed"]
