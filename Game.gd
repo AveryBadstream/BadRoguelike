@@ -99,7 +99,7 @@ class Enemy extends Reference:
 	var awake = false
 	
 	func _init(game, enemy_level, x, y):
-		full_hp = (1 + enemy_level) * 2 
+		full_hp = (1 + enemy_level) * 3 
 		level = enemy_level + 1
 		hp = full_hp
 		tile = Vector2(x, y)
@@ -300,23 +300,23 @@ func random_item_type(chance_list):
 	
 func blind(item):
 	FCTM.show_value("Anti-Carrot Poition!", player_tile, Color.orange)
-	blind_turns = item.strength * (1+(randi() % 5)) * 5
+	blind_turns = item.strength * (1+(randi() % 2)) * 5
 	$CanvasLayer/Blind.visible = true
 	$Player/BlindEffect.visible = true
 
 func heal_over_time(item):
 	FCTM.show_value("Ivermectin!", player_tile, Color.pink)
-	healing_turns = item.strength * (1+(randi() % 3)) * 5
+	healing_turns = item.strength * (1+(randi() % 2)) * 3
 	$CanvasLayer/Healing.visible = true
 	
 func poison(item):
 	FCTM.show_value("Gross!", player_tile, Color.darkgreen)
-	poison_turns = item.strength * (1+(randi() % 4)) * 5
+	poison_turns = item.strength * (1+(randi() % 2)) * 3
 	$CanvasLayer/Poisoned.visible = true
 	
 func strength(item):
 	FCTM.show_value("Super Male Vitality!", player_tile, Color.gold)
-	strong_turns = item.strength * (1+(randi() % 2)) * 5
+	strong_turns = item.strength * (1+(randi() % 2)) * 10
 	$CanvasLayer/Strong.visible = true
 
 func heal(item):
@@ -405,6 +405,7 @@ func build_level():
 			if !blocked && x != player_tile.x && y != player_tile.y:
 				var item_type = random_item_type(ITEM_CREATION_CHANCES)
 				items.append(Item.new(self, x, y, item_type, level_num))
+				items[items.size()-1].sprite_node.visible = false
 			place_tries += 1
 	
 	call_deferred("update_visuals")
@@ -479,7 +480,8 @@ func update_visuals():
 	if cur_level > player_level:
 		FCTM.show_value("LEVEL UP!", player_tile, Color.blue)
 		player_level = cur_level
-	player_max_hp = calc_player_max_hp()
+		player_hp += calc_player_max_hp() - player_max_hp
+		player_max_hp = calc_player_max_hp()
 					
 	$CanvasLayer/HP.text = "HP: " + str(player_hp) + "/" + str(player_max_hp)
 	$CanvasLayer/Score.text = "Score: " + str(score)
@@ -709,7 +711,7 @@ func damage_player(dmg):
 		game_stopped = true
 
 func calc_player_level():
-	return floor(score/50) + 1
+	return floor(score/100) + 1
 
 func calc_player_max_hp():
 	return (player_level * 5) + 5
@@ -729,5 +731,6 @@ func _on_Button_pressed():
 	build_level()
 	$CanvasLayer/Win.visible = false
 	$CanvasLayer/Lose.visible = false
-	player_hp = calc_player_max_hp()
+	player_max_hp = calc_player_max_hp()
+	player_hp = player_max_hp
 	player_level = calc_player_level()
