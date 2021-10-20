@@ -14,10 +14,11 @@ const LEVEL_SIZES =[
 ]
 
 const LEVEL_COLORS = [Color.beige, Color.cadetblue, Color.darkmagenta, Color.goldenrod, Color.lightsalmon, Color.darkgray, Color.lawngreen]
-const ENEMY_COLORS = [Color.green, Color.purple, Color.darkslateblue, Color.indigo, Color.orangered, Color.gold]
+const ENEMY_COLORS = [Color.green, Color.purple, Color.darkslateblue, Color.indigo, Color.orangered, Color.gold, Color.gray, Color.darkgray]
 const LEVEL_ROOM_COUNTS = [5, 7, 9, 12, 15]
 const LEVEL_ENEMY_COUNTS = [5, 8, 12, 18, 26]
 const LEVEL_ITEM_COUNTS = [2, 4, 6, 8, 10]
+const MIMIC_FRAME = 5
 const MIN_ROOM_DIMENSION = 5
 const MAX_ROOM_DIMENSION = 8
 const PLAYER_START_HP = 10
@@ -97,16 +98,77 @@ class Enemy extends Reference:
 	var level
 	var dead = false
 	var awake = false
+	var damage_func ="basic_damage"
+	
+	func basic_damage(game):
+		game.damage_player(level)
+	
+	func treasure_damage(game):
+		game.damage_player( max(1, (game.level_num) * (randi() % 3) ) )
+		
+	func tentacle_damage(game):
+		game.FCTM.show_value("Tentacle Caress ;)", tile, Color.darkgreen)
+		game.poison_turns += 2
+	
+	func rogue_damage(game):
+		var chance = randi() % 3
+		if chance <= 1:
+			game.damage_player(3)
+		else:
+			game.FCTM.show_value("Pocket Sand!!!", tile, Color.orange)
+			game.blind_turns += 5
+		
+	func helpotron_damage(game):
+		var chance = randi() % 10
+		if chance < 3:
+			game.heal_player((game.level_num+1) * 2 )
+			game.FCTM.show_value("Nice Massage!!", tile, Color.pink)
+		elif chance < 5:
+			game.strong_turns += 5
+			game.FCTM.show_value("Robo Steroids!", tile, Color.gold)
+		elif chance < 7:
+			game.healing_turns += (game.level_num + 1) * 2
+			game.FCTM.show_value("Feel My Love!", tile, Color.pink)
+		elif chance < 8 :
+			game.damage_player(game.level_num+1)
+			game.FCTM.show_value("Oops ;*", tile, Color.pink)
+		else:
+			hp = 0
+			dead = true
+			game.FCTM.show_value("ARRROW ARROW ARROW", tile, Color.red)
+			
+	func crusher_damage(game):
+		game.damage_player((game.level_num + 1) * 2)
 	
 	func _init(game, enemy_level, x, y):
-		full_hp = (1 + enemy_level) * 3 
 		level = enemy_level + 1
-		hp = full_hp
 		tile = Vector2(x, y)
+		var chance = randi() % 150
+		if chance <= level * 3:
+			damage_func = "treasure_damage"
+			level = 6
+			full_hp = (enemy_level + 1) * 5
+		elif chance <= level * 2:
+			level = 7
+			damage_func = "helpotron_damage"
+			full_hp = level
+		elif chance <= level:
+			level = 8
+			damage_func = "crusher_damage"
+			full_hp = 15
+		else:
+			if enemy_level == 1:
+				damage_func = "tentacle_damage"
+			elif enemy_level == 2:
+				awake = true
+			elif enemy_level == 3:
+				damage_func = "rogue_damage"
+			full_hp = (1 + enemy_level) * 2 
+		hp = full_hp
 		sprite_node = EnemyScene.instance()
 		game.add_child(sprite_node)
-		sprite_node.set_sprite(enemy_level)
-		sprite_node.modulate_sprite(game.ENEMY_COLORS[enemy_level])
+		sprite_node.set_sprite(level - 1)
+		sprite_node.modulate_sprite(game.ENEMY_COLORS[level - 1])
 		sprite_node.position = tile * TILE_SIZE
 		sprite_node.visible = true
 		sprite_node.z_index = 1
@@ -129,22 +191,42 @@ class Enemy extends Reference:
 			game.FCTM.show_value(dmg*-1, tile, Color.red)
 			
 	func act(game):
-		var my_point = game.enemy_pathfinding.get_closest_point(tile)
-		var player_point = game.enemy_pathfinding.get_closest_point(game.player_tile)
-		var path = game.enemy_pathfinding.get_point_path(my_point, player_point)
+		var path
+		if level != 8:
+			var my_point = game.enemy_pathfinding.get_closest_point(tile)
+			var player_point = game.enemy_pathfinding.get_closest_point(game.player_tile)
+			path = game.enemy_pathfinding.get_point_path(my_point, player_point)
+		else:
+			var direction = game.tile_direction_movement(tile, game.player_tile)
+			var next_tile = Vector2(int(tile.x + (direction.x * -1)), int(tile.y + (direction.y * -1)))
+			path = [null, next_tile]
 		if path:
 			assert(path.size() > 1)
-			var move_tile = path[1]
+			var move_tile = Vector2(int(path[1].x), int(path[1].y))
 			
 			if move_tile == game.player_tile:
-				game.damage_player(int((1+level) * (max(.5, (randi() % 100)/100 ) ) ) )
+				call(damage_func, game)
 			else:
 				var blocked = false
 				for enemy in game.enemies:
 					if enemy.tile == move_tile:
 						blocked = true
 						break
-						
+				if level == 8:
+					var targ_tile = game.map[move_tile.x][move_tile.y]
+					if targ_tile == game.Tile.Stone or targ_tile == game.Tile.Wall:
+						game.set_tile(move_tile.x, move_tile.y, game.Tile.Floor)
+				if level == 7 and randi()%1 == 0:
+					var chance = randi() % 3
+					if chance == 0:
+						game.FCTM.show_value("Helpotron Coming!", tile, Color.pink)
+					elif chance == 1:
+						game.FCTM.show_value("Helpotron Coming!", tile, Color.pink)
+					elif chance == 2:
+						if randi() % 50 == 50:
+							game.FCTM.show_value("Bush Did 911!", tile, Color.pink)
+						else:
+							game.FCTM.show_value("I Love You!", tile, Color.pink)
 				if !blocked:
 					tile = move_tile
 
@@ -196,18 +278,19 @@ func _input(event):
 	elif event.is_action("Down"):
 		try_move(0, 1)
 	elif event is InputEventMouseButton && !event.is_echo():
-		var mouse_loc = get_global_mouse_position()/16
-		var direction = tile_direction(player_tile, mouse_loc)
-		if direction.x != 0 && direction.y != 0:
-			if randi() % 2 == 0:
-				direction = Vector2(direction.x, 0)
-			else:
-				direction = Vector2(0, direction.y)
-		try_move(direction.x * -1, direction.y * -1)
+		if event.pressed:
+			var mouse_loc = get_global_mouse_position()/16
+			var direction = tile_direction_movement(player_tile, mouse_loc)
+			if direction.y != 0 and direction.x != 0:
+				if randi() % 2 == 0:
+					direction = Vector2(direction.x, 0)
+				else:
+					direction = Vector2(0, direction.y)
+			try_move(direction.x * -1, direction.y * -1)
 
 func try_move(dx, dy):
-	var x = player_tile.x + clamp(dx, -1, 1)
-	var y = player_tile.y + clamp(dy, -1, 1)
+	var x = player_tile.x + int(clamp(dx, -1, 1))
+	var y = player_tile.y + int(clamp(dy, -1, 1))
 	
 	var tile_type = Tile.Stone
 	if x >= 0 && x < level_size.x && y >= 0 && y < level_size.y:
@@ -250,6 +333,7 @@ func try_move(dx, dy):
 			else:
 				score += 1000
 				$CanvasLayer/Win.visible = true
+				$CanvasLayer/Win/Button.grab_focus()
 				game_stopped = true
 				
 	for enemy in enemies:
@@ -263,13 +347,17 @@ func do_move(x, y):
 		if enemy.tile.x == x && enemy.tile.y == y:
 			enemy.take_damage(self, max(1, int(player_level/2)) * (1 if strong_turns == 0 else 2))
 			if enemy.dead:
-				var drop_item = random_item_type(ITEM_DROP_CHANCES) if enemy.level < 5 else random_item_type(ITEM_CREATION_CHANCES)
+				var drop_item
+				if enemy.level == 6:
+					drop_item = ItemType.Treasure
+				else:
+					drop_item = random_item_type(ITEM_DROP_CHANCES) if enemy.level > 5 else random_item_type(ITEM_CREATION_CHANCES)
 				if drop_item:
 					for item in items:
 						if item.tile == enemy.tile:
 							blocked = true
 					if !blocked:
-						items.append(Item.new(self, enemy.tile.x, enemy.tile.y, drop_item, enemy.level))
+						items.append(Item.new(self, enemy.tile.x, enemy.tile.y, drop_item, min(4,enemy.level) ))
 				enemy.remove()
 				enemies.erase(enemy)
 				return true
@@ -284,7 +372,7 @@ func pickup_items():
 		if item.tile == player_tile:
 			if item.use_function == "heal" and player_hp == player_max_hp:
 				continue
-			call(item.use_function, item)
+			call(item.use_function, item.strength)
 			item.remove()
 			remove_queue.append(item)
 	
@@ -298,32 +386,32 @@ func random_item_type(chance_list):
 			return chance[0]
 	return null
 	
-func blind(item):
+func blind(strength):
 	FCTM.show_value("Anti-Carrot Poition!", player_tile, Color.orange)
-	blind_turns = item.strength * (1+(randi() % 2)) * 5
+	blind_turns = strength * (1+(randi() % 2)) * 5
 	$CanvasLayer/Blind.visible = true
 	$Player/BlindEffect.visible = true
 
-func heal_over_time(item):
+func heal_over_time(strength):
 	FCTM.show_value("Ivermectin!", player_tile, Color.pink)
-	healing_turns = item.strength * (1+(randi() % 2)) * 3
+	healing_turns = strength * (1+(randi() % 2)) * 3
 	$CanvasLayer/Healing.visible = true
 	
-func poison(item):
+func poison(strength):
 	FCTM.show_value("Gross!", player_tile, Color.darkgreen)
-	poison_turns = item.strength * (1+(randi() % 2)) * 3
+	poison_turns += strength * (1+(randi() % 2)) * 3
 	$CanvasLayer/Poisoned.visible = true
 	
-func strength(item):
+func strength(strength):
 	FCTM.show_value("Super Male Vitality!", player_tile, Color.gold)
-	strong_turns = item.strength * (1+(randi() % 2)) * 10
+	strong_turns = strength * (1+(randi() % 2)) * 10
 	$CanvasLayer/Strong.visible = true
 
-func heal(item):
-	heal_player(item.strength * 5)
+func heal(strength):
+	heal_player(strength * 5)
 	
-func score(item):
-	score += item.strength * 25
+func score(strength):
+	score += strength * 25
 	
 func build_level():
 	rooms.clear()
@@ -468,6 +556,9 @@ func update_visuals():
 		else:
 			enemy.sprite_node.visible = true
 			enemy.awake = true
+		if enemy.dead:
+			enemy.remove()
+			enemies.erase(enemy)
 			
 	for item in items:
 		item.sprite_node.position = item.tile * TILE_SIZE
@@ -491,25 +582,57 @@ func update_visuals():
 	$CanvasLayer/Player_Level.text = "Level: " + str(player_level)
 	if blind_turns > 0:
 		$CanvasLayer/Blind.text = "Blind: " + str(blind_turns)
+		$CanvasLayer/Blind.visible = true
 	else:
 		$CanvasLayer/Blind.visible = false
 		$Player/BlindEffect.visible = false
 	if poison_turns > 0:
 		$CanvasLayer/Poisoned.text = "Poisoned: " + str(poison_turns)
+		$CanvasLayer/Poisoned.visible = true
 	else:
 		$CanvasLayer/Poisoned.visible = false
 	if healing_turns > 0:
 		$CanvasLayer/Healing.text = "Healing: " + str(healing_turns)
+		$CanvasLayer/Healing.visible = true
 	else:
 		$CanvasLayer/Healing.visible = false
 	if strong_turns > 0:
 		$CanvasLayer/Strong.text = "STRONGK: " + str(strong_turns)
+		$CanvasLayer/Strong.visible = true
 	else:
 		$CanvasLayer/Strong.visible = false
 		
 	
 func tile_direction(from_tile, to_tile):
-	return Vector2(1 if to_tile.x < from_tile.x else -1, 1 if to_tile.y < from_tile.y else -1)
+	var x_dir = 0
+	var y_dir = 0
+	if to_tile.x < from_tile.x:
+		x_dir = 1
+	elif to_tile.x > from_tile.x:
+		x_dir = -1
+	if to_tile.y > from_tile.y:
+		y_dir = -1
+	elif to_tile.y < from_tile.y:
+		y_dir = 1
+	return Vector2(x_dir, y_dir)
+	
+func tile_direction_movement(from_tile, to_tile):
+	var x_dir = 0
+	var y_dir = 0
+	if to_tile.x < from_tile.x:
+		x_dir = 1
+	elif to_tile.x > from_tile.x:
+		x_dir = -1
+	if to_tile.y > from_tile.y:
+		y_dir = -1
+	elif to_tile.y < from_tile.y:
+		y_dir = 1
+	if x_dir != 0 and y_dir != 0:
+		if abs(to_tile.y - from_tile.y) > abs(to_tile.x - from_tile.x):
+			x_dir = 0
+		else:
+			y_dir = 0
+	return Vector2(x_dir, y_dir)
 
 func tile_to_pixel_center(x, y):
 	return Vector2((x + 0.5) * TILE_SIZE, (y + 0.5) * TILE_SIZE)
@@ -707,6 +830,7 @@ func damage_player(dmg):
 	player_hp = max(0, player_hp - dmg)
 	if player_hp == 0:
 		$CanvasLayer/Lose.visible = true
+		$CanvasLayer/Lose/Button.grab_focus()
 		poison_turns = 0
 		strong_turns = 0
 		blind_turns = 0
