@@ -331,6 +331,9 @@ func build_level():
 	tile_map.clear()
 	for enemy in enemies:
 		enemy.remove()
+	for item in items:
+		item.remove()
+	items.clear()
 	enemies.clear()
 	
 	tile_map.modulate = LEVEL_COLORS[int(randi() % LEVEL_COLORS.size())]
